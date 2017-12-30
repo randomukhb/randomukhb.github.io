@@ -1,0 +1,72 @@
+---
+layout: default
+---
+
+<button id="randomButton" type="button" class="btn btn-primary">Random song</button>
+<h1 id="songTitle">Song Title</h1>
+<h4 id="words">Words</h4>
+<h3 id="tenor">Tenor</h3>
+<h3 id="lead">Lead</h3>
+<h3 id="bari">Bari</h3>
+<h3 id="bass">Bass</h3>
+<h6 id="pitchStr">Pitch</h6>
+<audio id="audio" controls="controls">
+    <source id="pitch" type="audio/mpeg" src=""></audio>
+</audio>
+
+<script>
+    // https://codepen.io/KryptoniteDove/post/load-json-file-locally-using-pure-javascript
+    var songs = [];
+    function loadCSV(callback) {   
+
+        var xobj = new XMLHttpRequest();
+        xobj.overrideMimeType("application/text");
+        xobj.open('GET', 'songs.csv', true); 
+        xobj.onreadystatechange = function () {
+        if (xobj.readyState == 4 && xobj.status == "200") {
+            // Required use of an anonymous callback as .open will 
+            // NOT return a value but simply returns undefined in asynchronous mode
+            callback(xobj.responseText);
+        }
+        };
+        xobj.send(null);  
+    }
+
+    function parseCSV() {
+        loadCSV(function(response) {
+            var res = response.split("\n");
+            for(i = 0; i < res.length; i++){
+                var curr = res[i].split(",");
+                if(curr.length == 1){ continue; }
+                songs.push(curr);
+            }
+        });
+    }
+
+    function getSong(){
+        if(songs.length == 0){
+            // Only read CSV file once
+            parseCSV();
+        }
+        var randomNumber = Math.floor(Math.random() * songs.length);
+        return songs[randomNumber];
+    }
+
+    // Parse CSV on page load
+    window.onload = parseCSV;
+
+    document.getElementById("randomButton").onclick = function () {
+        var currSong = getSong();
+        document.getElementById("songTitle").innerHTML = currSong[0];
+        document.getElementById("tenor").innerHTML = "Tenor: " + currSong[1];
+        document.getElementById("lead").innerHTML = "Lead: " + currSong[2];
+        document.getElementById("bari").innerHTML = "Bari: " + currSong[3];
+        document.getElementById("bass").innerHTML = "Bass: " + currSong[4];
+        document.getElementById("pitch").src = currSong[5];
+        var audio = document.getElementById("audio");
+        audio.load();
+        document.getElementById("pitchStr").innerHTML = "Pitch: " + currSong[6];
+        document.getElementById("words").innerHTML = currSong[7];
+    };
+
+</script>
